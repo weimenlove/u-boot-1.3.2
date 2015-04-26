@@ -181,4 +181,51 @@
 #define	CFG_ENV_IS_IN_FLASH	1
 #define CFG_ENV_SIZE		0x10000	/* Total Size of Environment Sector */
 
+#if 1 //add by weimen 2010-12-28
+#define CONFIG_S3C2410_NAND_BOOT 1
+#define STACK_BASE 0x33f00000
+#define STACK_SIZE 0x8000
+#define UBOOT_RAM_BASE 0x33f80000
+#define CFG_NAND_BASE 0x4E000000
+#define CFG_MAX_NAND_DEVICE 1
+#define SECTORSIZE 512
+#define NAND_SECTOR_SIZE SECTORSIZE
+#define NAND_BLOCK_MASK (NAND_SECTOR_SIZE - 1)
+#define ADDR_COLUMN 1
+#define ADDR_PAGE 2
+#define ADDR_COLUMN_PAGE 3
+#define NAND_ChipID_UNKNOWN 0x00
+#define NAND_MAX_FLOORS 1
+#define NAND_MAX_CHIPS 1
+#define WRITE_NAND_COMMAND(d, adr) do {rNFCMD = d;} while(0)
+#define WRITE_NAND_ADDRESS(d, adr) do {rNFADDR = d;} while(0)
+#define WRITE_NAND(d, adr) do {rNFDATA = d;} while(0)
+#define READ_NAND(adr) (rNFDATA)
+#define NAND_WAIT_READY(nand) {while(!(rNFSTAT&(1<<0)));}
+#define NAND_DISABLE_CE(nand) {rNFCONF |= (1<<11);}
+#define NAND_ENABLE_CE(nand) {rNFCONF &= ~(1<<11);}
+#define NAND_CTL_CLRALE(nandptr)
+#define NAND_CTL_SETALE(nandptr)
+#define NAND_CTL_CLRCLE(nandptr)
+#define NAND_CTL_SETCLE(nandptr)
+
+#define CONFIG_MTD_NAND_VERIFY_WRITE 1
+#define rNFCONF (*(volatile unsigned int *)0x4e000000)
+#define rNFCMD (*(volatile unsigned char *)0x4e000004)
+#define rNFADDR (*(volatile unsigned char *)0x4e000008)
+#define rNFDATA (*(volatile unsigned char *)0x4e00000c)
+#define rNFSTAT (*(volatile unsigned int *)0x4e000010)
+#define rNFECC (*(volatile unsigned int *)0x4e000014)
+#define rNFECC0 (*(volatile unsigned char *)0x4e000014)
+#define rNFECC1 (*(volatile unsigned char *)0x4e000015)
+#define rNFECC2 (*(volatile unsigned char *)0x4e000016)
+#define NF_CMD(cmd) {rNFCMD=cmd;}
+#define NF_ADDR(addr) {rNFADDR=addr;}
+#define NF_nFCE_L() {rNFCONF&=~(1<<11);}
+#define NF_nFCE_H() {rNFCONF|=(1<<11);}
+#define NF_RSTECC() {rNFCONF|=(1<<12);}
+#define NF_RDDATA() (rNFDATA)
+#define NF_WRDATA(data) {rNFDATA=data;}
+#define NF_WAITRB() {while(!(rNFSTAT&(1<<0)));}
+#endif //add end
 #endif	/* __CONFIG_H */

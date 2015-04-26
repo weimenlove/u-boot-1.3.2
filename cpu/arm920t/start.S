@@ -158,7 +158,7 @@ copyex:
 	ldr	r0, =INTMSK
 	str	r1, [r0]
 # if defined(CONFIG_S3C2410)
-	ldr	r1, =0x3ff
+	ldr	r1, =0x7ff 	/*0x3ff-- ->0x7ff,changed by weimen*/
 	ldr	r0, =INTSUBMSK
 	str	r1, [r0]
 # endif
@@ -178,9 +178,14 @@ copyex:
 	bl	cpu_init_crit
 #endif
 
-#ifdef	CONFIG_AT91RM9200
+/*#ifdef	CONFIG_AT91RM9200*/  /*del by weimen 2010-12-28*/
 
 #ifndef CONFIG_SKIP_RELOCATE_UBOOT
+/*add by weimen 2010-12-28*/
+#ifdef CONFIG_S3C2410_NAND_BOOT
+	bl copy_myself
+#else
+/*add end*/
 relocate:				/* relocate U-Boot to RAM	    */
 	adr	r0, _start		/* r0 <- current position of code   */
 	ldr	r1, _TEXT_BASE		/* test if we run from flash or RAM */
@@ -197,8 +202,9 @@ copy_loop:
 	stmia	r1!, {r3-r10}		/* copy to   target address [r1]    */
 	cmp	r0, r2			/* until source end addreee [r2]    */
 	ble	copy_loop
+#endif /*add by weimen 2010-12-28*/
 #endif	/* CONFIG_SKIP_RELOCATE_UBOOT */
-#endif
+/*#endif*/ /*del by weimen 2010-12-28*/
 	/* Set up the stack						    */
 stack_setup:
 	ldr	r0, _TEXT_BASE		/* upper 128 KiB: relocated uboot   */
@@ -220,6 +226,47 @@ clbss_l:str	r2, [r0]		/* clear loop...                    */
 	ble	clbss_l
 
 	ldr	pc, _start_armboot
+
+/*add by weimen 2010-12-28*/
+  /* ***********************************************
+   *
+   * copy u-boot to ram
+   *
+   *************************************************
+   */
+#ifdef CONFIG_S3C2410_NAND_BOOT
+copy_myself:
+	mov	r10, lr @save return address to r10
+	ldr	sp, DW_STACK_START
+	mov 	fp, #0
+	bl 	NF_Init
+	ldr	r0, =UBOOT_RAM_BASE
+	mov 	r1, #0x0
+	mov 	r2, #0x30000
+	bl 	nand_read_whole
+	tst 	r0, #0x0
+	beq 	ok_nand_read
+1:	 b 	1b
+ok_nand_read:
+	mov 	r0, #0x00000000
+	ldr 	r1, =UBOOT_RAM_BASE
+	mov 	r2, #0x400
+go_next:
+	ldr 	r3, [r0], #4
+	ldr 	r4, [r1], #4
+	teq 	r3, r4
+	bne	notmatch
+	subs 	r2, r2, #4
+	beq 	done_nand_read
+	bne 	go_next
+notmatch:
+1: 	b 	1b
+done_nand_read:
+	mov 	pc, r10
+#endif
+DW_STACK_START:
+	.word	STACK_BASE+STACK_SIZE-4
+/*add end*/
 
 _start_armboot:	.word start_armboot
 
