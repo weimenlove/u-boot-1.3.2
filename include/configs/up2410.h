@@ -53,9 +53,17 @@
 /*
  * Hardware drivers
  */
+#if 0  //del by weimen 2010-12-28
 #define CONFIG_DRIVER_CS8900	1	/* we have a CS8900 on-board */
 #define CS8900_BASE		0x19000300
 #define CS8900_BUS16		1 /* the Linux driver does accesses as shorts */
+#else
+#define CONFIG_DRIVER_DM9000 1
+#define CONFIG_DRIVER_DM9000_BASE 0x10000000
+#define DM9000_IO CONFIG_DM9000_BASE
+#define DM9000_DATA (DM9000_IO + 2)
+#define CONFIG_DM9000_USE_16BIT
+#endif //add end
 
 /*
  * select serial console configuration
@@ -91,7 +99,22 @@
 #define CONFIG_CMD_DATE
 #define CONFIG_CMD_ELF
 
+#if 1 //add by weimen 2010-12-28, locate in config_cmd_all.h
+#define CONFIG_CMD_REGINFO
+#define CONFIG_CMD_NAND
+#define CONFIG_CMD_PING
+#define CONFIG_CMD_DLF
+#define CONFIG_CMD_ENV
+#define CONFIG_CMD_NET
+#endif //add end
 
+#if 1 //add by weimen 2011-11-11
+#define CONFIG_CMDLINE_EDITING
+#define CONFIG_AUTO_COMPLETE
+#define CONFIG_VERSION_VARIABLE //the U-Boot version as printed by the "version" command
+#endif //add end
+
+#if 0 //del by weimen 2010-12-28
 #define CONFIG_BOOTDELAY	3
 /*#define CONFIG_BOOTARGS    	"root=ramfs devfs=mount console=ttySA0,9600" */
 /*#define CONFIG_ETHADDR	08:00:3e:26:0a:5b */
@@ -100,6 +123,19 @@
 #define CONFIG_SERVERIP		10.0.0.1
 /*#define CONFIG_BOOTFILE	"elinos-lart" */
 /*#define CONFIG_BOOTCOMMAND	"tftp; bootm" */
+#else
+#define CONFIG_BOOTDELAY 3  //add by weimen 2011-11-11. Set to -1 to disable autoboot
+#define CONFIG_BOOTARGS "root=/dev/mtdblock2 noinitrd console=ttySAC0,115200"
+#define CONFIG_ETHADDR 08:00:3e:26:0a:5b
+#define CONFIG_NETMASK 255.255.255.0
+#define CONFIG_IPADDR 192.168.1.2
+#define CONFIG_SERVERIP 192.168.1.3
+#define CONFIG_BOOTFILE "uImage"
+#define CONFIG_BOOTCOMMAND "tftp; bootm"
+#define CONFIG_CMDLINE_TAG 1
+#define CONFIG_SETUP_MEMORY_TAGS 1
+#define CONFIG_INITRD_TAG 1
+#endif //add end
 
 #if defined(CONFIG_CMD_KGDB)
 #define CONFIG_KGDB_BAUDRATE	115200		/* speed to run kgdb serial port */
@@ -111,7 +147,7 @@
  * Miscellaneous configurable options
  */
 #define	CFG_LONGHELP				/* undef to save memory		*/
-#define	CFG_PROMPT		"SMDK2410 # "	/* Monitor Command Prompt	*/
+#define	CFG_PROMPT		"[wm_2410#] "	/* Monitor Command Prompt	*/
 #define	CFG_CBSIZE		256		/* Console I/O Buffer Size	*/
 #define	CFG_PBSIZE (CFG_CBSIZE+sizeof(CFG_PROMPT)+16) /* Print Buffer Size */
 #define	CFG_MAXARGS		16		/* max number of command args	*/
@@ -122,7 +158,12 @@
 
 #undef  CFG_CLKS_IN_HZ		/* everything, incl board info, in Hz */
 
+#if 0 // del by weien
 #define	CFG_LOAD_ADDR		0x33000000	/* default load address	*/
+#else
+#define CFG_LOAD_ADDR 0x30008000
+#define CFG_TFTP_LOADADDR 0x30008000
+#endif //add end
 
 /* the PWM TImer 4 uses a counter of 15625 for 10 ms, so we need */
 /* it to wrap 100 times (total 1562500) to get 1 sec. */
@@ -178,8 +219,15 @@
 #define CFG_FLASH_ERASE_TOUT	(5*CFG_HZ) /* Timeout for Flash Erase */
 #define CFG_FLASH_WRITE_TOUT	(5*CFG_HZ) /* Timeout for Flash Write */
 
+#if 0 //del by weimen 2010-2-12-28
 #define	CFG_ENV_IS_IN_FLASH	1
 #define CFG_ENV_SIZE		0x10000	/* Total Size of Environment Sector */
+#else
+
+#define CFG_ENV_IS_IN_NAND 1
+#define CFG_ENV_SIZE 0x4000
+#define CFG_ENV_OFFSET (0x80000-0x4000)
+#endif //add end
 
 #if 1 //add by weimen 2010-12-28
 #define CONFIG_S3C2410_NAND_BOOT 1
@@ -228,4 +276,5 @@
 #define NF_WRDATA(data) {rNFDATA=data;}
 #define NF_WAITRB() {while(!(rNFSTAT&(1<<0)));}
 #endif //add end
+
 #endif	/* __CONFIG_H */
